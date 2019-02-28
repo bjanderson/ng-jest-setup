@@ -1,0 +1,29 @@
+
+$white: rgba(255, 255, 255, 1);
+$black: rgba(0, 0, 0, 1);
+
+$flag-red: rgba(194,17,58, 1);
+$flag-blue: rgba(0, 42, 108, 1);
+
+$red: rgba(255, 0 ,0, 1);
+$cerulean: rgba(0, 123, 167, 1);
+
+$link-color: $cerulean;
+$main-bg: $white;
+$main-color: $black;
+
+.required {
+  color: $red;
+}
+
+.link-color {
+  color: $link-color;
+}
+
+.main-bg {
+  background-color: $main-bg;
+}
+
+.main-color {
+  color: $main-color;
+}
