@@ -15,20 +15,20 @@ module.exports = {
   ],
 
   testPathIgnorePatterns: [
-    'config/',
-    'coverage/',
-    'dist/',
-    'e2e/',
-    'jest/',
-    'node_modules/',
-    'scripts/',
-    'server/',
-    'webpack/',
-    'src/app/*.{js}',
-    'src/app/*.{scss}'
+    '<rootDir>/config/',
+    '<rootDir>/coverage/',
+    '<rootDir>/dist/',
+    '<rootDir>/e2e/',
+    '<rootDir>/jest/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/scripts/',
+    '<rootDir>/server/',
+    '<rootDir>/webpack/',
+    '<rootDir>/src/app/*.(js|scss)',
   ],
 
   testMatch: [
+    "<rootDir>/src/app/*.spec.ts",
     "<rootDir>/src/app/**/*.spec.ts"
   ],
 

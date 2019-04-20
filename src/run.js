@@ -4,11 +4,12 @@ import { createFolder, getFolderPath, readFromFile, removeFile, writeToFile } fr
 
 const paths = {
   templates: {
-    gitignore: path.resolve('src', 'templates', 'gitignore.txt'),
-    jestconfig: path.resolve('src', 'templates', 'jestconfig.txt'),
     colorsscss: path.resolve('src', 'templates', 'colorsscss.txt'),
     cursorscss: path.resolve('src', 'templates', 'cursorscss.txt'),
+    environmentDev: path.resolve('src', 'templates', 'environment.dev.txt'),
+    gitignore: path.resolve('src', 'templates', 'gitignore.txt'),
     globalscss: path.resolve('src', 'templates', 'globalscss.txt'),
+    jestconfig: path.resolve('src', 'templates', 'jestconfig.txt'),
     stylescss: path.resolve('src', 'templates', 'stylescss.txt'),
   }
 };
@@ -50,6 +51,7 @@ function runSetup() {
   setupGlobalScss();
   setupColorsScss();
   setupCursorScss();
+  createEnvironmentDevTs();
 }
 
 function getPaths() {
@@ -68,6 +70,7 @@ function getPaths() {
   paths.tsconfigJson = path.resolve(folderPath, 'tsconfig.json');
   paths.tslintJson = path.resolve(folderPath, 'tslint.json');
 
+  paths.environmentDev = path.resolve(folderPath, 'src', 'environments', 'environment.dev.ts');
   paths.jestconfig = path.resolve(folderPath, 'src', 'jest.config.js');
   paths.karmaconf = path.resolve(folderPath, 'src', 'karma.conf.js');
   paths.testts = path.resolve(folderPath, 'src', 'test.ts');
@@ -148,6 +151,22 @@ function setupAngularJson() {
   const text = readFromFile(paths.angularJson);
   const json = JSON.parse(text);
   const projectName = json.defaultProject;
+
+  json.projects[projectName].architect.build.configurations.development = {
+    fileReplacements: [
+      {
+        replace: 'src/environments/environment.ts',
+        with: 'src/environments/environment.dev.ts'
+      }
+    ]
+  };
+
+  json.projects[projectName].architect.serve.configurations.development = {
+    browserTarget: `${projectName}:build:development`,
+    proxyConfig: 'proxy-config.json'
+  };
+
+
   json.projects[projectName].architect.test = {
     'builder': '@angular-builders/jest:run',
     'options': {}
@@ -187,9 +206,10 @@ function setupPackagejson() {
   text = text.replace(/~/g, '').replace(/\^/g, '');
   const json = JSON.parse(text);
 
-  const removeDevDeps = ['jasmine-core']
+  const removeDevDeps = Object.keys(json.devDependencies)
+    .filter(d => d.includes('jasmine'))
     .concat(Object.keys(json.devDependencies)
-    .filter(d => d.indexOf('karma') > -1));
+      .filter(d => d.includes('karma')));
 
   removeDevDeps.forEach(d => {
     delete json.devDependencies[d];
@@ -197,7 +217,8 @@ function setupPackagejson() {
 
   const newDevDeps = {
     '@angular-builders/jest': '7.0.0',
-    'jest': '23.6.0',
+    '@types/jest': '24.0.0',
+    'jest': '24.0.0',
     'jest-sonar-reporter': '2.0.0',
   };
   json.devDependencies = Object.assign({}, json.devDependencies, newDevDeps);
@@ -211,13 +232,17 @@ function setupPackagejson() {
   json.dependencies = Object.assign({}, json.dependencies, newDeps);
 
   json.scripts = {
-    'build': 'npm run clean:build && ng build',
-    'build:prod': 'npm run clean:build && ng build --prod',
+    'prebuild': 'npm run clean:build',
+    'build': 'ng build',
+    'prebuild:prod': 'npm run clean:build',
+    'build:prod': 'ng build --configuration=production',
     'clean:build': 'rimraf ./dist',
     'e2e': 'ng e2e',
     'lint': 'ng lint',
-    'start': 'npm run start:proxy',
-    'start:proxy': 'ng serve --proxy-config ./proxy-config.json',
+    "start": "npm run start:dev",
+    "start:dev": "ng serve --configuration=development",
+    "start:prod": "ng serve --configuration=production",
+    "start:proxy": "ng serve --proxy-config ./proxy-config.json",
     'test': 'ng test',
     'test:clear': 'ng test --clearCache',
     'test:cov': 'ng test --coverage',
@@ -226,4 +251,9 @@ function setupPackagejson() {
 
   const newText = JSON.stringify(json, null, 2);
   writeToFile(paths.packageJson, newText);
+}
+
+function createEnvironmentDevTs() {
+  const text = readFromFile(paths.templates.environmentDev);
+  writeToFile(paths.environmentDev, text);
 }
