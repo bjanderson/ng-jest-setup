@@ -6,4 +6,4 @@ Put the ng-jest-setup folder in the same directory as the folder for your angula
     rm -rf node_modules
     npm i
 
-    npm start -- folder=folder-name
+    npm start -- folder=angular-project-folder
