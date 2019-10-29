@@ -6,6 +6,6 @@
     "start": "node -r esm src/run.js"
   },
   "dependencies": {
-    "esm": "3.0.84"
+    "esm": "3.2.25"
   }
 }
